@@ -1,0 +1,71 @@
+# Makefile
+#
+# Implicit Rules
+#
+#    Implicit rules are predefined commands for predefined file types, such
+#    as .c, .o and others.
+#
+#    Implicit rules relieve programmers from having to specify all the
+#    commands. Typically, implicit rules are parameterized by macros such as
+#    the CC and CFLAG macros.
+#
+#    Since we are using implicit rules, it is possible to omit the commands
+#    out of the rules below
+#
+
+#MACROS
+CFLAGS = -Wall -c
+ASMFLAGS = -f coff -t
+CC = gcc
+LD = gcc
+ASM = nasm
+OBJECTS = io.o tabuleiro.o video-text.o video-graphics.o sprite.o ints.o music.o handler_teclado.o handler_rato.o kbc.o rtc.o
+
+#COMPILE
+arkanoid.exe: libjogo.a main.o
+	$(LD) main.o -L. -ljogo -o arkanoid.exe
+
+#%.o: %.c
+#	$(CC) $(CFLAGS) $<
+	
+io.o: io.c io.h
+	$(CC) $(CFLAGS) io.c
+	
+tabuleiro.o: tabuleiro.c tabuleiro.h utypes.h video-graphics.h sprite.h pixmap.h
+	$(CC) $(CFLAGS) tabuleiro.c
+	
+video-text.o: video-text.c video-text.h utypes.h
+	$(CC) $(CFLAGS) video-text.c
+	
+video-graphics.o: video-graphics.c video-graphics.h utypes.h
+	$(CC) $(CFLAGS) video-graphics.c
+
+sprite.o: sprite.c sprite.h video-graphics.h
+	$(CC) $(CFLAGS) sprite.c	
+
+ints.o: ints.c ints.h
+	$(CC) $(CFLAGS) ints.c
+
+music.o: music.c music.h timer.h
+	$(CC) $(CFLAGS) music.c
+
+handler_teclado.o: handler_teclado.asm
+	$(ASM) $(ASMFLAGS) handler_teclado.asm -o handler_teclado.o
+	
+handler_rato.o: handler_rato.asm
+	$(ASM) $(ASMFLAGS) handler_rato.asm -o handler_rato.o
+
+kbc.o: kbc.c kbc.h utypes.h ints.h
+	$(CC) $(CFLAGS) kbc.c
+
+rtc.o: rtc.c rtc.h utypes.h
+	$(CC) $(CFLAGS) rtc.c
+
+main.o: main.c arkanoid.h
+	$(CC) $(CFLAGS) main.c
+	
+libjogo.a: $(OBJECTS) 
+	ar -cr libjogo.a $(OBJECTS) 
+	
+clean:
+	rm -f *.o libjogo.a arkanoid.exe
